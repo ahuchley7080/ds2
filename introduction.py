@@ -31,6 +31,10 @@ birds_questions = [
 assert banded_birds[0][1] == 28, "the first item in banded_birds was unexpected"
 assert len(birds_questions) == 7, "Wrong number of birds_questions"
 
+schools = ["Pomona","Scripps","Scripps","Scripps","CMC","Scripps",
+    "Scripps","Scripps","Pitzer","Pitzer","Scripps","Scripps",
+    "Pomona","Pomona","Scripps","Pitzer","Scripps","Pomona",
+    "Pomona","Scripps"]
 
 users = [
     { "id": 0, "name": "Hero" },
