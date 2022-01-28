@@ -9,6 +9,11 @@ import tabulate
 
 DEBUG = False
 
+schools = ["Pomona","Scripps","Scripps","Scripps","CMC","Scripps",
+    "Scripps","Scripps","Pitzer","Pitzer","Scripps","Scripps",
+    "Pomona","Pomona","Scripps","Pitzer","Scripps","Pomona",
+    "Pomona","Scripps"]
+
 # a bit from https://nyu-cds.github.io/courses/exercises/Basic-python-1/
 banded_birds = [['A1', 28], ['A2', 32], ['A3', 1], ['A4', 0],
         ['A5', 10], ['A6', 22], ['A7', 30], ['A8', 19],
@@ -30,11 +35,6 @@ birds_questions = [
 
 assert banded_birds[0][1] == 28, "the first item in banded_birds was unexpected"
 assert len(birds_questions) == 7, "Wrong number of birds_questions"
-
-schools = ["Pomona","Scripps","Scripps","Scripps","CMC","Scripps",
-    "Scripps","Scripps","Pitzer","Pitzer","Scripps","Scripps",
-    "Pomona","Pomona","Scripps","Pitzer","Scripps","Pomona",
-    "Pomona","Scripps"]
 
 users = [
     { "id": 0, "name": "Hero" },
