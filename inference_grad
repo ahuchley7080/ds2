@@ -1,0 +1,137 @@
+from typing import Tuple, Callable, TypeVar, List, Iterator
+import math
+from scratch.probability import normal_cdf, inverse_normal_cdf
+from scratch.linear_algebra import Vector, dot, distance, add, scalar_multiply, vector_mean
+import random
+
+def normal_approximation_to_binomial(n: int, p: float) -> Tuple[float, float]:
+    """Returns mu and sigma corresponding to a Binomial(n, p)"""
+    mu = p*n
+    sigma = math.sqrt(p*(1-p)*n)
+    return mu, sigma
+
+#the normal cdf is the probability the variable is below a threshold
+normal_probability_below = normal_cdf
+
+#it's above the threshold if it's not below the threshold
+def normal_probability_above(lo: float, mu: float = 0, sigma: float = 1) -> float:
+    """the probability that an N(mu, sigma) is greater than lo."""
+    return 1 - normal_cdf(lo, mu, sigma)
+    
+#it's between if it's less than hi but not less than lo
+def normal_probability_between(lo: float, hi: float, mu: float = 0, sigma: float = 1) -> float:
+    """the probability that an N(mu, sigma) is between lo and hi"""
+    return normal_cdf(hi, mu, sigma) - normal_cdf(lo, mu, sigma)
+
+#it's outside if it's not between
+def normal_probability_outside(lo: float, hi: float, mu: float = 0, sigma: float = 1) -> float:
+    """the probability that an N(mu, sigma) is not between lo and hi"""
+    return 1 - normal_probability_between(lo, hi, mu, sigma)
+    
+def normal_upper_bound(probability: float, mu: float = 0, sigma: float = 1) -> float:
+    """Returns the z for which P(Z <= z) = probability"""
+    return inverse_normal_cdf(probability, mu, sigma)
+    
+def normal_lower_bound(probability: float, mu: float = 0, sigma: float = 1) -> float:
+    """returns the z for which P(Z>= z) = probability"""
+    return inverse_normal_cdf(1 - probability, mu, sigma)
+    
+def normal_two_sided_bounds(probability: float, mu: float = 0, sigma: float = 1) -> Tuple[float, float]:
+    """returns the symmetric (about the mean) bounds that contain the specified probability
+    tail_probability = (1 - probability) / 2
+    #upper bound should have tail probability above it, lower bound should have prob below it
+    upper_bound = normal_lower_bound(tail_probability, mu, sigma)
+    lower_bound = normal_upper_bound(tail_probability, mu, sigma)
+    return lower_bound, upper_bound
+    
+def two_sided_p_value(x: float, mu: float = 0, sigma: float = 1) -> float:
+    """how likely are we to see a value at least as extreme as x in either direction if our values are from an N(mu, sigma)"""
+    if x >= mu:
+        #x is greater than the mean, so the tail is everything greater than x
+        return 2 * normal_probability_above(x, mu, sigma)
+    else:
+        #x is less than the mean, so the tail is everything less than x
+        return 2 * normal_probability_below(x, mu, sigma)
+        
+        
+def estimated_parameters(N: int, n: int) -> Tuple[float, float]:
+    p = n / N
+    sigma = math.sqrt(p*(1-p) / N)
+    return p, sigma
+    
+def a_b_test_statistic(N_A: int, n_A: int, N_B: int, n_B: int) -> float:
+    p_A, sigma_A = estimated_parameters(N_A, n_A)
+    p_B, sigma_B = estimated_parameters(N_B, n_B)
+    return (p_B - p_A) / math.sqrt(sigma_A ** 2 + sigma_B ** 2)
+    
+def B(alpha: float, beta:float) -> float:
+    """a normalizing constant so that the total probability is 1"""
+    return math.gamma(alpha) * math.gamma(beta) / math.gamma(alpha + beta)
+
+def beta_pdf(x: float, alpha: float, beta: float) -> float:
+    if x <= 0 or x >= 1: #no weight outside of [0, 1]
+        return 0
+    return x ** (alpha - 1) * (1 - x) ** (beta - 1) / B(alpha, beta)
+    
+def sum_of_squares(v: Vector) -> float:
+    """computes the sum of squared elements in v"""
+    return dot(v, v)
+
+def difference_quotient(f: Callable[[float], float], x: float, h: float) -> float:
+    return (f(x+h) - f(x)) / h
+    
+def square(x: float) -> float:
+    return x * x
+    
+def partial_difference_quotient(f: Callable[[Vector], float], v: Vector, i: int, h: float) -> float:
+    """returns the i-th partial difference quotient of f at v"""
+    w = [v_j + (h if j == i else 0)  #add h to just the ith element of v
+         for j, v_j in enumerate(v)]
+         
+    return (f(w) - f(v)) / h
+    
+def estimate_gradient(f: Callable[[Vector], float], v: Vector, h: float = 0.0001):
+    return [partial_difference_quotient(f, v, i, h) for i in range(len(v))]
+    
+def gradient_step(v: Vector, gradient: Vector, step_size: float) -> Vector:
+    """moves step_size in the gradient direction from v"""
+    assert len(v) == len(gradient)
+    step = scalar_multiply(step_size, gradient)
+    return add(v, step)
+    
+def sum_of_squares_gradient(v: Vector) -> Vector:
+    return [2 * v_i for v_i in v]
+
+def linear_gradient(x: float, y: float, theta: Vector) -> Vector:
+    slope, intercept = theta
+    predicted = slope * x + intercept
+    error = (predicted - y)
+    squared_error = error ** 2
+    grad = [2 * error * x, 2 * error]
+    return grad
+    
+#epochs are passes through the dataset
+
+#start with random values for slope and intercept
+theta = [random.uniform(-1, 1), random.uniform(-1, 1)]
+learning_rate = 0.001
+for epoch in range(5000):
+    #compute mean of gradients
+    grad = vector_mean([linear_gradient(x, y, theta) for x, y in inputs])
+    #take a step in that direction
+    theta = gradient_step(theta, grad, -learning_rate)
+    print(epoch, theta)
+slope, intercept = theta
+
+T = TypeVar('T') #this allows us to type generic functions
+
+def minibatches(dataset: List[T], batch_size: int, shuffle: bool = True) -> Iterator[List[T]]:
+    """generates 'batch_size'-sized minibatches from the dataset"""
+    #start indexes -, batch_size, 2 * batch_size....
+    batch_starts = [start for start in range(0, len(dataset), batch_size)]
+    
+    if shuffle: random.shuffle(batch_starts) #shuffle the batches
+    
+    for start in batch_starts:
+        end = start + batch_size
+        yield dataset[start:end]
