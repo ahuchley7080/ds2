@@ -78,9 +78,9 @@ def distance(v: Vector, w: Vector) -> float:
      """Computes the distance between v and w"""
      return math.sqrt(squared_distance(v, w))
      
- def dist_w_magnitude(v: Vector, w: Vector) -> float:
-     """computes distance between v and w"""
-     return magnitude(subtract(v, w))
+def dist_w_magnitude(v: Vector, w: Vector) -> float:
+    """computes distance between v and w"""
+    return magnitude(subtract(v, w))
      
      
 assert add([1, 2, 3], [10,9,8]) == [11,11,11], "something wrong with add()"
