@@ -1,5 +1,5 @@
 from typing import List
-from ahuchley7080 import linear_algebra.py
+from ahuchley7080 import linear_algebra
 import math
 
 def mean(xs: List[float]) -> float:
