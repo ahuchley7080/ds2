@@ -66,3 +66,15 @@ def correlation(xs: List[float], ys: List[float]) -> float:
         return covariance(xs, ys) / stdev_x / stdev_y
     else:
         return 0 #if no variation, correlation is 0
+        
+def data_range(xs: List[float]) -> float:
+    return max(xs) - min(xs)
+    
+def quantile(xs: List[float], p: float) -> float:
+    """Returns the pth-percentile value in x"""
+    p_index = int(p * len(xs))
+    return sorted(xs)[p_index]
+    
+def interquartile_range(xs: List[float]) -> float:
+    """Returns the difference between the 75%-ile and the 25%-ile"""
+    return quantile(xs, 0.75) - quantile(xs, 0.25)
