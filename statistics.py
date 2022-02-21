@@ -1,5 +1,5 @@
 from typing import List
-from scratch.linear_algebra import sum_of_squares, dot
+from ahuchley7080.linear_algebra import sum_of_squares, dot
 import math
 
 def mean(xs: List[float]) -> float:
