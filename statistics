@@ -1,4 +1,6 @@
 from typing import List
+from scratch.linear_algebra import sum_of_squares, dot
+import math
 
 def mean(xs: List[float]) -> float:
     return sum(xs) / len(xs)
@@ -31,4 +33,36 @@ def mode(x: List[float]) -> List[float]:
     max_count = max(counts.values())
     return [x_i for x_i, count in counts.items()
             if count == max_count]
+            
 
+
+def de_mean(xs: List[float]) -> List[float]:
+    """translate xs by subtracting its mean so the result has mean 0"""
+    x_bar = mean(xs)
+    return [x - x_bar for x in xs]
+    
+def variance(xs: List[float]) -> float:
+    """almost the average squared deviation from the mean"""
+    assert len(xs) >= 2, "variance requires at least 2 elements"
+    
+    n = len(xs)
+    deviations = de_mean(xs)
+    return sum_of_squares(deviations) / (n-1)
+    
+def standard_deviation(xs: List[float]) -> float:
+    """the standard deviation is the square root of the variance"""
+    return math.sqrt(variance(xs))
+    
+def covariance(xs: List[float], ys: List[float]) -> float:
+    assert len(xs) == len(ys), "xs and ys must have same # of elements"
+    
+    return dot(de_mean(xs), de_mean(ys)) / (len(xs) - 1)
+    
+def correlation(xs: List[float], ys: List[float]) -> float:
+    """measures how much xs and xy vary in tandem about their means"""
+    stdev_x = standard_deviation(xs)
+    stdev_y = standard_deviation(ys)
+    if stdev_x > 0 and stdev_y > 0:
+        return covariance(xs, ys) / stdev_x / stdev_y
+    else:
+        return 0 #if no variation, correlation is 0
