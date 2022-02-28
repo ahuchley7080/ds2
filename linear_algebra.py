@@ -71,7 +71,7 @@ def distance(v: Vector, w: Vector) -> float:
 #def distance(v: Vector, w: Vector) -> float:  # type: ignore
     #return magnitude(subtract(v, w))
     
-#missing def shape
+Matrix = List[List[float]]
 
 assert add([1, 2, 3], [10,9,8]) == [11,11,11], "something's wrong with add()"
 assert subtract([11,11,11], [1, 2, 3]) == [10,9,8], "trouble with subtract()"
